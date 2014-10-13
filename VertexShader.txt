@@ -1,0 +1,41 @@
+﻿attribute vec3 aPosition;
+attribute vec2 aTextureCoord;
+varying vec2 vTextureCoord;
+uniform mat4 uModelView;
+uniform mat4 uProj;
+
+attribute vec3 aVertexNormal;
+
+uniform mat4 uNormalMatrix;
+uniform vec3 uAmbientColor;
+uniform vec3 uLightDirection;
+uniform vec3 uDirectionalColor;
+uniform bool uUseAmbientLight;
+uniform bool uUseParallelLlight;
+
+varying vec3 vLightWeighting;
+
+void main()
+{
+    gl_Position = uProj * uModelView * vec4(aPosition,1.0);
+    vTextureCoord = aTextureCoord;
+
+    if(uUseAmbientLight||uUseParallelLlight)
+	{
+        if(uUseAmbientLight)
+        {
+            vLightWeighting += uAmbientColor;
+        }
+
+        if(uUseParallelLlight)
+        {
+           vec3 transformedNormal = (uNormalMatrix * vec4(aVertexNormal, 1.0)).xyz;
+           float directionalLightWeighting = max(dot(transformedNormal,-uLightDirection), 0.0);
+           vLightWeighting += uDirectionalColor * directionalLightWeighting;
+        }
+    }
+    else
+    {
+        vLightWeighting = vec3(1.0, 1.0, 1.0);
+    }
+}
